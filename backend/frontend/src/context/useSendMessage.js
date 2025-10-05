@@ -9,25 +9,30 @@ const useSendMessage = () => {
   const { socket } = useSocketContext();
 
   const sendMessages = async (message) => {
-    setLoading(true);
-    try {
-      const res = await axios.post(
-        `/api/message/send/${selectedConversation._id}`,
-        { message }
-      );
+  setLoading(true);
+  try {
+    const token = localStorage.getItem("token");
 
-      // Update sender's UI instantly
-      setMessage((prev) => [...prev, res.data]);
+    const res = await axios.post(
+      `/api/message/send/${selectedConversation._id}`,
+      { message },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-      // Emit to receiver
-      socket.emit("sendMessage", res.data);
+    // Update UI instantly
+    setMessage((prev) => [...prev, res.data]);
 
-      setLoading(false);
-    } catch (error) {
-      console.log("Error in send messages", error);
-      setLoading(false);
-    }
-  };
+    setLoading(false);
+  } catch (error) {
+    console.log("Error in send messages", error);
+    setLoading(false);
+  }
+};
+
 
   return { loading, sendMessages };
 };
